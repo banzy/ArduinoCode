@@ -62,8 +62,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 char      chBuffer[128];                                                    // general purpose character buffer
-char      chPassword[] =                  "<<password>>";                   // your network password
-char      chSSID[] =                      "<<SSID>>";                       // your network SSID
+char      chPassword[] =                  "password";                       // your network password
+char      chSSID[] =                      "SSID";                           // your network SSID
 bool      bTimeReceived =                 false;                            // time has not been received
 U8G2_SSD1306_128X64_NONAME_F_HW_I2C       u8g2(U8G2_R0, 16, 15, 4);         // OLED graphics
 int       nWifiStatus =                   WL_IDLE_STATUS;                   // wifi status
