@@ -61,11 +61,11 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-char      chBuffer[128];                                                    // general purpose character buffer
-char      chPassword[] =                  "password";                       // your network password
-char      chSSID[] =                      "SSID";                           // your network SSID
-bool      bTimeReceived =                 false;                            // time has not been received
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C       u8g2(U8G2_R0, 16, 15, 4);         // OLED graphics
+char      chBuffer[128];                                                   // general purpose character buffer
+char      chPassword[] =                  "__PASSWORD__";                  // your network password
+char      chSSID[] =                      "__SSIS__";                      // your network SSID
+bool      bTimeReceived =                 false;                           // time has not been received
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C       u8g2(U8G2_R0, 16, 15, 4);        // OLED graphics
 int       nWifiStatus =                   WL_IDLE_STATUS;                   // wifi status
 WiFiUDP   Udp;
 int       DST = 0;
@@ -86,16 +86,70 @@ void setup()
     Serial.print('.');
   }
 
-  time_t DSTeurope, utc;
+  time_t DSTtime, utc;
+  utc = now();  //current time from the Time Library
+
+  // // Australia Eastern Time Zone (Sydney, Melbourne)
+  // TimeChangeRule aEDT = {"AEDT", First, Sun, Oct, 2, 660};    // UTC + 11 hours
+  // TimeChangeRule aEST = {"AEST", First, Sun, Apr, 3, 600};    // UTC + 10 hours
+  // Timezone ausET(aEDT, aEST);
+  // DSTtime = ausET.toLocal(utc);
+
+  // // Moscow Standard Time (MSK, does not observe DST)
+  // TimeChangeRule msk = {"MSK", Last, Sun, Mar, 1, 180};
+  // Timezone tzMSK(msk);
+  // DSTtime = tzMSK.toLocal(utc);
+
+  // // United Kingdom (London, Belfast)
+  // TimeChangeRule BST = {"BST", Last, Sun, Mar, 1, 60};        // British Summer Time
+  // TimeChangeRule GMT = {"GMT", Last, Sun, Oct, 2, 0};         // Standard Time
+  // Timezone UK(BST, GMT);
+  // DSTtime = UK.toLocal(utc);
+
+  // // UTC
+  // TimeChangeRule utcRule = {"UTC", Last, Sun, Mar, 1, 0};     // UTC
+  // Timezone UTC(utcRule);
+  // DSTtime = UTC.toLocal(utc);
+
+  // // US Eastern Time Zone (New York, Detroit)
+  // TimeChangeRule usEDT = {"EDT", Second, Sun, Mar, 2, -240};  // Eastern Daylight Time = UTC - 4 hours
+  // TimeChangeRule usEST = {"EST", First, Sun, Nov, 2, -300};   // Eastern Standard Time = UTC - 5 hours
+  // Timezone usET(usEDT, usEST);
+  // DSTtime = usET.toLocal(utc);
+
+  // // US Central Time Zone (Chicago, Houston)
+  // TimeChangeRule usCDT = {"CDT", Second, Sun, Mar, 2, -300};
+  // TimeChangeRule usCST = {"CST", First, Sun, Nov, 2, -360};
+  // Timezone usCT(usCDT, usCST);
+  // DSTtime = usCT.toLocal(utc);
+
+  // // US Mountain Time Zone (Denver, Salt Lake City)
+  // TimeChangeRule usMDT = {"MDT", Second, Sun, Mar, 2, -360};
+  // TimeChangeRule usMST = {"MST", First, Sun, Nov, 2, -420};
+  // Timezone usMT(usMDT, usMST);
+  // DSTtime = usMT.toLocal(utc);
+
+  // // Arizona is US Mountain Time Zone but does not use DST
+  // Timezone usAZ(usMST);
+  // DSTtime = usAZ.toLocal(utc);
+
+  // // US Pacific Time Zone (Las Vegas, Los Angeles)
+  // TimeChangeRule usPDT = {"PDT", Second, Sun, Mar, 2, -420};
+  // TimeChangeRule usPST = {"PST", First, Sun, Nov, 2, -480};
+  // Timezone usPT(usPDT, usPST);
+  // DSTtime = usPT.toLocal(utc);
+
+
+  // Central European Time (Frankfurt, Paris)
   TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Central European Summer Time
   TimeChangeRule CET = {"CET ", Last, Sun, Oct, 3, 60};       // Central European Standard Time
   Timezone CE(CEST, CET);
-  utc = now();  //current time from the Time Library
-  DSTeurope = CE.toLocal(utc);
-  DST = (DSTeurope/3600) - 1;
-  
+  DSTtime = CE.toLocal(utc);
+
+
+  DST = (DSTtime/3600) - 1;
   Serial.print("Current DST for your zone: ");
-  Serial.println(DSTeurope);
+  Serial.println(DSTtime);
 
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
