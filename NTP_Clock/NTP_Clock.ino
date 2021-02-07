@@ -61,14 +61,16 @@
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-char      chBuffer[128];                                                   // general purpose character buffer
-char      chPassword[] =                  "__PASSWORD__";                  // your network password
-char      chSSID[] =                      "__SSIS__";                      // your network SSID
-bool      bTimeReceived =                 false;                           // time has not been received
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C       u8g2(U8G2_R0, 16, 15, 4);        // OLED graphics
-int       nWifiStatus =                   WL_IDLE_STATUS;                   // wifi status
+char      chBuffer[128];                                                    // general purpose character buffer
+char      chPassword[] =                  "PASSWORD";                       // your network password
+char      chSSID[] =                      "SSID";                           // your network SSID
+bool      bTimeReceived =                 false;                            // time has not been received
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C       u8g2(U8G2_R0, 16, 15, 4);         // OLED graphics
+int       nWifiStatus =                   WL_IDLE_STATUS;                    // wifi status
 WiFiUDP   Udp;
 int       DST = 0;
+int       DSTtime = 0;
+int       start = 0;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Setup
@@ -86,8 +88,7 @@ void setup()
     Serial.print('.');
   }
 
-  time_t DSTtime, utc;
-  utc = now();  //current time from the Time Library
+
 
   // // Australia Eastern Time Zone (Sydney, Melbourne)
   // TimeChangeRule aEDT = {"AEDT", First, Sun, Oct, 2, 660};    // UTC + 11 hours
@@ -139,17 +140,6 @@ void setup()
   // Timezone usPT(usPDT, usPST);
   // DSTtime = usPT.toLocal(utc);
 
-
-  // Central European Time (Frankfurt, Paris)
-  TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Central European Summer Time
-  TimeChangeRule CET = {"CET ", Last, Sun, Oct, 3, 60};       // Central European Standard Time
-  Timezone CE(CEST, CET);
-  DSTtime = CE.toLocal(utc);
-
-
-  DST = (DSTtime/3600) - 1;
-  Serial.print("Current DST for your zone: ");
-  Serial.println(DSTtime);
 
   pinMode(25, OUTPUT);
   digitalWrite(25, HIGH);
@@ -359,7 +349,20 @@ void  loop()
     }
   }
 
-  if (refresh > 900000) {  //3000 min
+  if (refresh > 16200 || start==0) {  //16200 one hour
+    start = 1;
+    time_t DSTtime, utc;
+    utc = now();  //current time from the Time Library
+    // Central European Time (Frankfurt, Paris)
+    TimeChangeRule CEST = {"CEST", Last, Sun, Mar, 2, 120};     // Central European Summer Time
+    TimeChangeRule CET = {"CET ", Last, Sun, Oct, 3, 60};       // Central European Standard Time
+    Timezone CE(CEST, CET);
+    DSTtime = CE.toLocal(utc);
+    DST = (DSTtime/3600) - 1;
+    Serial.println();
+    Serial.print("Current DST for your zone: ");
+    Serial.println(DST);
+
     WiFi.begin(chSSID, chPassword);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -376,7 +379,7 @@ void  loop()
   {
     refresh += 1;
 
-    Serial.println(String(9000 - refresh));
+    Serial.println(String(16200 - refresh));
 
     digitalWrite(25, LOW);
     // Ntp time has been received, ajusted and written to the ESP32 rtc, so obtain the time from the ESP32 rtc.
@@ -397,13 +400,13 @@ void  loop()
 
     strftime(chBuffer, sizeof(chBuffer), "%a, %d %b %Y",  tmPointer);
     u8g2.setFont(u8g2_font_6x10_tr);
-    u8g2.drawStr(64 - (u8g2.getStrWidth(chBuffer) / 2), 7, chBuffer); //0
+    u8g2.drawStr(60 - (u8g2.getStrWidth(chBuffer) / 2), 7, chBuffer); //0
 
     // Display the time.
 
     strftime(chBuffer, sizeof(chBuffer), "%I:%M:%S",  tmPointer);
     u8g2.setFont(u8g2_font_fur20_tn);
-    u8g2.drawStr(10, 53 - FONT_TWO_HEIGHT, chBuffer);  //63 - FONT_TWO_HEIGHT
+    u8g2.drawStr(10, 52 - FONT_TWO_HEIGHT, chBuffer);  //63 - FONT_TWO_HEIGHT
 
     // Send the display buffer to the OLED
 
