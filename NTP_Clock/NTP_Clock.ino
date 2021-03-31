@@ -358,7 +358,7 @@ void  loop()
     TimeChangeRule CET = {"CET ", Last, Sun, Oct, 3, 60};       // Central European Standard Time
     Timezone CE(CEST, CET);
     DSTtime = CE.toLocal(utc);
-    DST = (DSTtime/3600) - 1;
+    DST = DSTtime/3600;
     Serial.println();
     Serial.print("Current DST for your zone: ");
     Serial.println(DST);
